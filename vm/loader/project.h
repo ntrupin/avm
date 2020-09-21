@@ -22,6 +22,7 @@ typedef struct {
 } avm_project;
 
 avm_project *avm_project_make(char *);
-void avm_project_free(avm_project *pp);
+void avm_project_free(avm_project *);
+avm_class *avm_project_resolve(avm_project *, char *);
 
 #endif //GIANT_PROJECT_H

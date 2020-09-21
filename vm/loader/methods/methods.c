@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "method.h"
 #include "methods.h"
@@ -38,4 +39,16 @@ void avm_methods_free(avm_methods *mp)
         avm_method_free(mp->methods[i], i);
     }
     if (mp) free(mp);
+}
+
+avm_method *avm_methods_resolve(avm_methods *mp, char *name)
+{
+    uint16_t i;
+    for (i=0;i<mp->len;i++) {
+        if (strcmp(mp->methods[i]->name->value, name) == 0) {
+            return mp->methods[i];
+        }
+    }
+    printf("Error resolving method with name %s", name);
+    exit(1);
 }

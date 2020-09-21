@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "loader/project.h"
+#include "interpreter/interpreter.h"
 
 int vm(int argc, char **argv)
 {
@@ -54,7 +55,7 @@ int vm(int argc, char **argv)
         0x00, 0x00, 0x00, 0x01,  0x00
     };
     FILE *f;
-    f = fopen("test.ko", "wb");
+    f = fopen("test.avm", "wb");
     uint32_t i;
     for (i=0;i<sizeof(test_set);i++) {
         putc(test_set[i], f);
@@ -63,8 +64,12 @@ int vm(int argc, char **argv)
 #endif
     }
     fclose(f);
+#if DEBUG
+    printf("\n");
 #endif
-    avm_project *p = avm_project_make("test.ko");
-    avm_project_free(p);
+#endif
+    avm_interpreter *ai = avm_interpreter_make("test.avm");
+    avm_interpreter_run(ai);
+    avm_interpreter_free(ai);
     return 0;
 }

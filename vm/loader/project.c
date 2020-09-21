@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "project.h"
 #include "class.h"
@@ -45,7 +46,7 @@ avm_project *avm_project_make(char *name)
 void avm_project_free(avm_project *p)
 {
 #if DEBUG
-    printf("AVM v%d.%d\nProject %s\n",
+    printf("\nAVM v%d.%d\nProject %s\n",
            p->major,
            p->minor,
            p->name->value
@@ -57,4 +58,16 @@ void avm_project_free(avm_project *p)
         avm_class_free(p->classes[i]);
     }
     if (p) free(p);
+}
+
+avm_class *avm_project_resolve(avm_project *p, char *name)
+{
+    uint8_t i;
+    for (i=0;i<p->count;i++) {
+        if (strcmp(p->classes[i]->name->value, name) == 0) {
+            return p->classes[i];
+        }
+    }
+    printf("Error resolving class with name %s", name);
+    exit(1);
 }

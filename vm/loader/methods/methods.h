@@ -18,5 +18,6 @@ typedef struct {
 
 avm_methods *avm_methods_make(FILE *, avm_constpool *);
 void avm_methods_free(avm_methods *);
+avm_method *avm_methods_resolve(avm_methods *, char *name);
 
 #endif //GIANT_METHODS_H

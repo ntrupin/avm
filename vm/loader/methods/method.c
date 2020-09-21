@@ -31,7 +31,7 @@ avm_method *avm_method_make(FILE *f, avm_constpool *cp)
 void avm_method_free(avm_method *m, uint16_t i)
 {
 #if DEBUG
-    printf("\t\t| 0x%04x => method[name: %s, type: %s]\n", i, m->name->value, m->desc->value);
+    printf("\t\t| 0x%04x => method[name: \"%s\", type: \"%s\"]\n", i, m->name->value, m->desc->value);
 #endif
     avm_method_attributes_free(m->attrs);
     if (m) free(m);

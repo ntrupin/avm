@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "attributes.h"
 #include "attribute.h"
@@ -39,5 +40,12 @@ void avm_method_attributes_free(avm_method_attributes *ats)
 
 avm_method_attribute *avm_method_attributes_resolve(avm_method_attributes *ats, char *name)
 {
-
+    uint16_t i;
+    for (i=0;i<ats->len;i++) {
+        if (strcmp(ats->attrs[i]->name->value, name) == 0) {
+            return ats->attrs[i];
+        }
+    }
+    printf("Error resolving attribute with name %s", name);
+    exit(1);
 }

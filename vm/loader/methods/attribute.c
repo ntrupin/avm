@@ -36,7 +36,7 @@ void avm_method_attribute_free(avm_method_attribute *a)
     printf("\t\t\t| %s => ", a->name->value);
     uint64_t i;
     for (i=0;i<a->len;i++) {
-        printf("0x%02x%s", a->data[i], i+1<a->len ? ", " : " ");
+        printf("0x%02x ", a->data[i]);
     }
     printf("\n");
 #endif
