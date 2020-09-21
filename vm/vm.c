@@ -52,7 +52,8 @@ int vm(int argc, char **argv)
         // methods Method Class + NaT + Attr Len + Attr Name
         0x00, 0x00, 0x00, 0x06, 0x00, 0x01, 0x00, 0x08,
         // Attr Data Len + Attr Data (Code)
-        0x00, 0x00, 0x00, 0x01,  0x00
+        0x00, 0x00, 0x00, 0x06,
+        0x00, 0x01, 0x03, 0x01, 0x05, 0x02
     };
     FILE *f;
     f = fopen("test.avm", "wb");
@@ -65,7 +66,7 @@ int vm(int argc, char **argv)
     }
     fclose(f);
 #if DEBUG
-    printf("\n");
+    printf("\n\n");
 #endif
 #endif
     avm_interpreter *ai = avm_interpreter_make("test.avm");

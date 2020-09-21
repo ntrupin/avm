@@ -31,6 +31,6 @@ avm_interpreter *avm_interpreter_make(char *name)
 
 void avm_interpreter_free(avm_interpreter *ai)
 {
-    if (ai->project) free(ai->project);
+    if (ai->project) avm_project_free(ai->project);
     if (ai) free(ai);
 }

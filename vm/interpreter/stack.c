@@ -57,8 +57,15 @@ avm_stack *avm_stack_make()
 
 void avm_stack_free(avm_stack *s)
 {
+#if DEBUG
+    printf("| stack\n");
+#endif
     while (s->count>0) {
-        avm_stack_pop(s);
+        avm_value *a = avm_stack_pop(s);
+#if DEBUG
+        printf("\t| => %d\n", a->avm_int);
+#endif
+        avm_value_free(a);
     }
     if (s) free(s);
 }
