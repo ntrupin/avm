@@ -8,13 +8,16 @@
 #include <stdlib.h>
 
 enum {
-    AVM_INT=0,
+    AVM_VOID=0,
+    AVM_INT=1,
+    AVM_DOUBLE=2,
 };
 
 typedef struct {
     uint8_t tag;
     union {
         int avm_int;
+        double avm_double;
     };
 } avm_value;
 

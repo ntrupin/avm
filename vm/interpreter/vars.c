@@ -36,7 +36,7 @@ void avm_vars_entry_free(avm_vars_entry *e)
 {
     if (!e) return;
     avm_value_free(e->value);
-    if (e->name) free(e->name);
+    //if (e->name) free(e->name);
     free(e);
 }
 
@@ -61,7 +61,7 @@ void avm_vars_insert(avm_vars *v, char *name, avm_value *value)
 
 avm_value *avm_vars_read(avm_vars *v, char *name)
 {
-    uint64_t hash = fnv1a(name) % v->size;
+    uint64_t hash = fnv1a(name) % (v->size - 1);
     for (;;hash++) {
         if (!v->entries[hash]) {
             continue;
@@ -75,7 +75,7 @@ avm_value *avm_vars_read(avm_vars *v, char *name)
 
 void avm_vars_delete(avm_vars *v, char *name)
 {
-    uint64_t hash = fnv1a(name) % v->size;
+    uint64_t hash = fnv1a(name) % (v->size - 1);
     for (;;hash++) {
         if (!v->entries[hash]) {
             continue;

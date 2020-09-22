@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "frame.h"
 #include "vars.h"
@@ -12,48 +13,108 @@
 #include "../loader/methods/methods.h"
 #include "../loader/methods/attributes.h"
 
-void avm_frame_exec(avm_frame *frame)
+avm_value *avm_frame_exec_return(avm_frame *frame, avm_method_attribute *code)
 {
+    uint8_t op = code->data[frame->ip];
+    switch (op) {
+        case AOP_RETURN: {
+            avm_value *a = avm_value_make(AVM_VOID);
+            if (frame->stack->count > 0) {
+                printf("error: misaligned stack in function %s", frame->method->name->value);
+                exit(1);
+            }
 #if DEBUG
-    printf("| trace\n");
+            printf("RETURN VOID\n");
 #endif
-    for (;frame->ip<frame->code->len;frame->ip++) {
-        uint8_t op = frame->code->data[frame->ip];
+            return a;
+        }
+        case AOP_IRETURN: {
+            avm_value *a = avm_stack_pop(frame->stack);
+            if (a->tag != AVM_INT) {
+                printf("error: expected int\n");
+                exit(1);
+            }
+            if (frame->stack->count > 0) {
+                printf("error: misaligned stack in function %s\n", frame->method->name->value);
+                exit(1);
+            }
+#if DEBUG
+            printf("RETURN %d\n", a->avm_int);
+#endif
+            return a;
+        }
+        default:
+            printf("error: invalid return byte 0x%02x\n", op);
+            exit(1);
+    }
+}
+
+avm_value *avm_frame_exec_load(avm_frame *frame, avm_method_attribute *code)
+{
+    uint8_t op = code->data[frame->ip];
+    switch (op) {
+        case AOP_ILOAD: {
+            uint16_t index = (
+                    ((uint16_t)code->data[++frame->ip] << 8) |
+                    ((uint16_t)code->data[++frame->ip])
+            );
+            avm_constpool_utf8 *name = avm_constpool_resolve(frame->class->constpool, index);
+            avm_value *a = avm_vars_read(frame->locals, name->value);
+            if (a->tag != AVM_INT) {
+                printf("error: expected int\n");
+                exit(1);
+            }
+            avm_stack_push(frame->stack, a);
+#if DEBUG
+            printf("ILOAD %d\n", a->avm_int);
+#endif
+            break;
+        }
+        default:
+            printf("error: invalid load byte 0x%02x\n", op);
+            exit(1);
+    }
+}
+
+avm_value *avm_frame_exec(avm_frame *frame, uint8_t argc, ...)
+{
+    va_list args;
+    va_start(args, argc);
+    uint8_t i;
+    for (i=0;i<argc;i++) {
+        avm_vars_insert(
+            frame->locals,
+            va_arg(args, char *),
+            va_arg(args, avm_value *)
+            );
+    }
+    va_end(args);
+    avm_method_attribute *code = avm_method_attributes_resolve(frame->method->attrs, "code");
+    for (;frame->ip<code->len;frame->ip++) {
+        uint8_t op = code->data[frame->ip];
 #if DEBUG
         printf("\t | 0x%04x => ", frame->ip);
 #endif
         switch (op) {
-            case 0x00: {
+            case AOP_NOP: {
 #if DEBUG
                 printf("NOP\n");
 #endif
                 break;
             }
-            case 0x01: {
-                avm_value *a = avm_value_make(AVM_INT);
-                a->avm_int = frame->code->data[++frame->ip];
-#if DEBUG
-                printf("PUSH 0x%04x\n", a->avm_int);
-#endif
-                avm_stack_push(frame->stack, a);
+            case AOP_RETURN ... AOP_RETURN3:
+                return avm_frame_exec_return(frame, code);
+            case AOP_LOAD ... AOP_DLOAD:
+                avm_frame_exec_load(frame, code);
                 break;
+            default: {
+                printf("error: invalid byte 0x%02x\n", op);
+                exit(1);
             }
-            case 0x02: {
-                avm_value *a = avm_stack_pop(frame->stack);
-                avm_value *b = avm_stack_pop(frame->stack);
-                avm_value *c = avm_value_make(AVM_INT);
-                c->avm_int = a->avm_int + b->avm_int;
-                avm_stack_push(frame->stack, c);
-#if DEBUG
-                printf("ADD 0x%04x, 0x%04x -> 0x%04x\n", a->avm_int, b->avm_int, c->avm_int);
-#endif
-                avm_value_free(a);
-                avm_value_free(b);
-                break;
-            }
-            default: break;
         }
     }
+    printf("Code execution should not reach here. Please file an issue at <https://github.com/ntrupin/avm/issues>\n");
+    exit(1);
 }
 
 avm_frame *avm_frame_make(avm_class *class, char *method)
@@ -65,8 +126,7 @@ avm_frame *avm_frame_make(avm_class *class, char *method)
     }
     f->ip = 0;
     f->class = class;
-    avm_method *main = avm_methods_resolve(class->methods, method);
-    f->code = avm_method_attributes_resolve(main->attrs, "code");
+    f->method = avm_methods_resolve(class->methods, method);
     f->stack = avm_stack_make();
     f->locals = avm_vars_make();
     return f;

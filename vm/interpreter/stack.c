@@ -63,7 +63,19 @@ void avm_stack_free(avm_stack *s)
     while (s->count>0) {
         avm_value *a = avm_stack_pop(s);
 #if DEBUG
-        printf("\t| => %d\n", a->avm_int);
+        printf("\t| => ");
+        switch (a->tag) {
+            case AVM_VOID:
+                printf("void\n");
+                break;
+            case AVM_INT:
+                printf("%d\n", a->avm_int);
+                break;
+            case AVM_DOUBLE:
+                printf("%f\n", a->avm_double);
+                break;
+            default: break;
+        }
 #endif
         avm_value_free(a);
     }

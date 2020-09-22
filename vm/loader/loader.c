@@ -17,7 +17,7 @@ uint8_t *lodbytes(FILE *f, uint32_t n)
     }
     uint32_t i;
     uint8_t c;
-    for (i=0;i<n&&(c=getc(f))>=0&&c<=UINT8_MAX;i++) {
+    for (i=0;i<n&&(c=getc(f))>=0&&i<UINT32_MAX;i++) {
         bytes[i] = c;
     }
     return bytes;
