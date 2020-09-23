@@ -11,6 +11,7 @@
 typedef struct {
     uint16_t name;
     uint16_t type;
+    uint8_t arity;
 } avm_constpool_nametype;
 
 avm_constpool_nametype *avm_constpool_nametype_make(FILE *);

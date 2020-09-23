@@ -11,6 +11,16 @@
 #include "../constpool/constpool.h"
 #include "../constpool/method.h"
 #include "../constpool/nametype.h"
+#include "../../runtime/value.h"
+
+uint8_t avm_method_type(uint8_t value)
+{
+    switch (value) {
+        case 'I':
+            return AVM_INT;
+        default: return 0;
+    }
+}
 
 avm_method *avm_method_make(FILE *f, avm_constpool *cp)
 {
@@ -25,6 +35,19 @@ avm_method *avm_method_make(FILE *f, avm_constpool *cp)
     m->name = avm_constpool_resolve(cp, nt->name);
     m->desc = avm_constpool_resolve(cp, nt->type);
     m->attrs = avm_method_attributes_make(f, cp);
+    m->arity = nt->arity;
+    uint8_t i;
+    m->args = malloc(sizeof(uint8_t) * m->arity);
+    if (!m->args) {
+        printf("Error allocating method types");
+        exit(1);
+    }
+    for (i=0;i<m->arity;i++) {
+        m->args[i] = avm_method_type(m->desc->value[i]);
+    }
+    m->ret = m->desc->value[i] == '-'
+            ? avm_method_type(m->desc->value[++i])
+            : AVM_VOID;
     return m;
 }
 

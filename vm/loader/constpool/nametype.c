@@ -15,6 +15,7 @@ avm_constpool_nametype *avm_constpool_nametype_make(FILE *f)
         printf("Error allocating string");
         exit(1);
     }
+    n->arity = lod1(f);
     n->name = lod2(f);
     n->type = lod2(f);
     return n;

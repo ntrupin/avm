@@ -17,6 +17,9 @@ typedef struct {
     avm_constpool_utf8 *name;
     avm_constpool_utf8 *desc;
     avm_method_attributes *attrs;
+    uint8_t arity;
+    uint8_t *args;
+    uint8_t ret;
 } avm_method;
 
 avm_method *avm_method_make(FILE *, avm_constpool *);
